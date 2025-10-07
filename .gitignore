@@ -43,3 +43,5 @@ build/
 ### Config Properties ###
 *.properties
 
+# ignore mysql db data
+db_data
