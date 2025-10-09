@@ -85,11 +85,12 @@ public class DBManager {
 		if (c != null) {
 			try {
 				System.out.println("Connection to db : " + c.getCatalog());
-				Properties p = c.getClientInfo();
-				Enumeration<Object> keys = p.keys();
-				while (keys.hasMoreElements()) {
-					String key = (String) keys.nextElement();
-					System.out.println(key + ":" + p.getProperty(key));
+				System.out.println("Tables List :");
+				// Display only tables create by scripts.sql
+				ResultSet rs = c.getMetaData().getTables(c.getCatalog(), null, "%", new String[] { "TABLE" });
+				while (rs.next()) {
+					String tableName = rs.getString("TABLE_NAME");
+					System.out.println(tableName);
 				}
 
 			} catch (SQLException e) {
