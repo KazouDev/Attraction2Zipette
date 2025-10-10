@@ -3,6 +3,7 @@ package com.b2z.dao;
 import com.b2z.model.Attraction;
 import com.b2z.model.HoraireOuverture;
 import com.b2z.utils.DBManager;
+import com.b2z.utils.DBRequest;
 import com.b2z.utils.JourSemaine;
 import jakarta.validation.constraints.NotNull;
 
@@ -16,28 +17,11 @@ public class AttractionDAO implements DAOInterface {
     public List<Attraction> findAll() {
 
 
-        List<Attraction> attractions = new ArrayList<>();
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBManager.getInstance().getConnection();
-            stmt = conn.createStatement();
-
-            String sql = "SELECT a.*, type.nom as type FROM Attraction a " +
-                         "LEFT JOIN AttractionType type ON a.type_id = type.id";
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                Attraction attraction = Attraction.fromResultSet(rs);
-                attractions.add(attraction);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DBManager.getInstance().cleanup(conn, stmt, rs);
-        }
+        List<Attraction> attractions = DBRequest.execute(
+                "SELECT a.*, type.nom as type FROM Attraction a LEFT JOIN AttractionType type ON a.type_id = type.id",
+                null,
+                Attraction::fromResultSet
+        );
 
         return attractions;
     }
