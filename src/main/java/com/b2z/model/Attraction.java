@@ -11,7 +11,7 @@ public class Attraction {
     private int tailleMin;
     private int tailleMinAdulte;
 
-    private List<HoraireOuverture> horaireOuvertures = new ArrayList<>();
+    private List<HoraireOuverture> horaireOuvertures;
 
     public Attraction(int id, String nom, AttractionType type, int tailleMin, int tailleMinAdulte) {
         this.id = id;
@@ -19,6 +19,7 @@ public class Attraction {
         this.type = type;
         this.tailleMin = tailleMin;
         this.tailleMinAdulte = tailleMinAdulte;
+        this.horaireOuvertures = new ArrayList<>();
     }
 
     public static Attraction fromResultSet(ResultSet rs) {

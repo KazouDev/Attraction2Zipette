@@ -5,9 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class DBManager {
 

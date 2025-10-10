@@ -1,18 +1,21 @@
 package com.b2z.dao;
 
 import com.b2z.model.Attraction;
-import com.b2z.model.AttractionType;
 import com.b2z.model.HoraireOuverture;
 import com.b2z.utils.DBManager;
 import com.b2z.utils.JourSemaine;
+import jakarta.validation.constraints.NotNull;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AttractionDAO implements DAOInterface {
 
     public List<Attraction> findAll() {
+
+
         List<Attraction> attractions = new ArrayList<>();
         Connection conn = null;
         Statement stmt = null;
@@ -39,7 +42,7 @@ public class AttractionDAO implements DAOInterface {
         return attractions;
     }
 
-    public Attraction findById(int id) {
+    public Attraction findById(@NotNull int id) {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -73,13 +76,37 @@ public class AttractionDAO implements DAOInterface {
     }
 
     @Override
-    public void create() {
-
+    public Attraction create(@NotNull Map props) {
+        return null;
     }
 
-    @Override
-    public void delete() {
 
+    @Override
+    public Attraction delete(@NotNull int id) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBManager.getInstance().getConnection();
+            stmt = conn.prepareStatement("DELETE FROM Attraction WHERE id = ? RETURNING *;");
+            stmt.setInt(1, id);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Attraction attraction = Attraction.fromResultSet(rs);
+                if (attraction == null){
+                    return null;
+                }
+                attraction.setHoraireOuvertures(this.getHoraireOuvertureFromAttraction(attraction.getId()));
+                return attraction;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBManager.getInstance().cleanup(conn, stmt, null);
+        }
+        return null;
     }
 
     private List<HoraireOuverture> getHoraireOuvertureFromAttraction(int attractionId) {
@@ -114,21 +141,5 @@ public class AttractionDAO implements DAOInterface {
         return horaires;
     }
 
-    public boolean delete(int id) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-
-        try {
-            conn = DBManager.getInstance().getConnection();
-            stmt = conn.prepareStatement("DELETE FROM Attraction WHERE id = ?");
-            stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            DBManager.getInstance().cleanup(conn, stmt, null);
-        }
-    }
 }
 

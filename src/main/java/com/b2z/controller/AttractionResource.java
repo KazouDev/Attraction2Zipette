@@ -12,7 +12,7 @@ import java.util.List;
 @Path("/attractions")
 public class AttractionResource {
 
-    private AttractionDAO attractionDAO = new AttractionDAO();
+    private final AttractionDAO attractionDAO = new AttractionDAO();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -31,6 +31,20 @@ public class AttractionResource {
         if (attraction == null) {
             throw new WebApplicationException("Attraction not found", 404);
         }
+        Gson gson = new Gson();
+        return gson.toJson(attraction);
+    }
+
+    // create
+
+    // update
+
+    // delete
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String deleteById(@PathParam("id") @NotNull int id) {
+        Attraction attraction = attractionDAO.delete(id);
         Gson gson = new Gson();
         return gson.toJson(attraction);
     }

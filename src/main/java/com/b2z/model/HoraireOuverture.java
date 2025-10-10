@@ -1,5 +1,6 @@
 package com.b2z.model;
 
+import com.b2z.utils.Horaire;
 import com.b2z.utils.JourSemaine;
 
 import java.sql.Time;

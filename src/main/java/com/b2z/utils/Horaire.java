@@ -1,4 +1,4 @@
-package com.b2z.model;
+package com.b2z.utils;
 
 import com.b2z.utils.JourSemaine;
 
