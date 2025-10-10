@@ -13,6 +13,19 @@ public class DBRequest {
 
     public static <T> List<T> execute(
             @NotNull  String query,
+            @Nullable Function<ResultSet, T> callback
+    ) {
+        return DBRequest.execute(query, null, callback);
+    }
+
+    public static <T> List<T> execute(
+            @NotNull  String query
+    ) {
+        return DBRequest.execute(query, null, null);
+    }
+
+    public static <T> List<T> execute(
+            @NotNull  String query,
             @Nullable Map<Integer, Object> params,
             @Nullable Function<ResultSet, T> callback
     ) {
@@ -20,7 +33,7 @@ public class DBRequest {
             return DBRequest.request(query, params, callback);
         } catch(SQLException e) {
             e.printStackTrace();
-            return null;
+            return new ArrayList<>();
         }
     }
 
@@ -51,6 +64,11 @@ public class DBRequest {
         conn = DBManager.getInstance().getConnection();
         stmt = conn.prepareStatement(query);
 
+        if(params != null) {
+            for(Map.Entry<Integer, Object> entry : params.entrySet()) {
+                stmt.setObject(entry.getKey(), entry.getValue());
+            }
+        }
 
         rs = stmt.executeQuery();
 
