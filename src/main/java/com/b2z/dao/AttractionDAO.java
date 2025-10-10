@@ -16,19 +16,23 @@ import java.util.Map;
 public class AttractionDAO implements DAOInterface {
 
     public List<Attraction> findAll() {
-        return DBRequest.execute(
-                "SELECT a.*, type.nom as type FROM Attraction a LEFT JOIN AttractionType type ON a.type_id = type.id",
-                null,
-                Attraction::fromResultSet
-        );
+        final String QUERY_STRING = """
+            SELECT a.*, type.nom as type 
+            FROM Attraction a
+            LEFT JOIN AttractionType type 
+            ON a.type_id = type.id    
+        """;
+        return DBRequest.execute(QUERY_STRING, null, Attraction::fromResultSet);
     }
 
     public Attraction findById(@NotNull int id) {
         final String QUERY_STRING = """
-                    SELECT a.*, type.nom as type FROM Attraction a
-                    LEFT JOIN AttractionType type ON a.type_id = type.id
-                    WHERE a.id = ?
-                """;
+            SELECT a.*, type.nom as type 
+            FROM Attraction a
+            LEFT JOIN AttractionType type 
+            ON a.type_id = type.id
+            WHERE a.id = ?
+        """;
         Map<Integer, Object> params = new HashMap<>();
         params.put(1, id);
         List<Attraction> result = DBRequest.execute(
@@ -49,33 +53,17 @@ public class AttractionDAO implements DAOInterface {
         return null;
     }
 
-
     @Override
     public Attraction delete(@NotNull int id) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBManager.getInstance().getConnection();
-            stmt = conn.prepareStatement("DELETE FROM Attraction WHERE id = ? RETURNING *;");
-            stmt.setInt(1, id);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                Attraction attraction = Attraction.fromResultSet(rs);
-                if (attraction == null) {
-                    return null;
-                }
-                attraction.setHoraireOuvertures(this.getHoraireOuvertureFromAttraction(attraction.getId()));
-                return attraction;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DBManager.getInstance().cleanup(conn, stmt, null);
-        }
-        return null;
+        final String QUERY_STRING ="""
+            DELETE FROM Attraction 
+            WHERE id = ? 
+            RETURNING *  
+        """;
+        Map<Integer, Object> params = new HashMap<>();
+        params.put(1, id);
+        List<Attraction> result = DBRequest.execute(QUERY_STRING, params, Attraction::fromResultSet);
+        return result.get(0);
     }
 
     private List<HoraireOuverture> getHoraireOuvertureFromAttraction(int attractionId) {
