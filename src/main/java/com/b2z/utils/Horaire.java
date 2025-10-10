@@ -2,6 +2,8 @@ package com.b2z.utils;
 
 import com.b2z.utils.JourSemaine;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 
 public abstract class Horaire {

@@ -74,7 +74,10 @@ public class DBRequest {
 
         if(callback != null) {
             while (rs.next()) {
-                results.add(callback.apply(rs));
+                T result = callback.apply(rs);
+                if(result != null) {
+                    results.add(result);
+                }
             }
             return results;
         }

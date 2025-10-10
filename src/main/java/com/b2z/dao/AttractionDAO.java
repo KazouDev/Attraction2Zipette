@@ -25,10 +25,10 @@ public class AttractionDAO implements DAOInterface {
 
     public Attraction findById(@NotNull int id) {
         final String QUERY_STRING = """
-            SELECT a.*, type.nom as type FROM Attraction a
-            LEFT JOIN AttractionType type ON a.type_id = type.id
-            WHERE a.id = ?
-        """;
+                    SELECT a.*, type.nom as type FROM Attraction a
+                    LEFT JOIN AttractionType type ON a.type_id = type.id
+                    WHERE a.id = ?
+                """;
         Map<Integer, Object> params = new HashMap<>();
         params.put(1, id);
         List<Attraction> result = DBRequest.execute(
@@ -37,7 +37,7 @@ public class AttractionDAO implements DAOInterface {
                 Attraction::fromResultSet
         );
         Attraction attraction = result.get(0);
-        if(attraction == null) {
+        if (attraction == null) {
             return null;
         }
         attraction.setHoraireOuvertures(this.getHoraireOuvertureFromAttraction(attraction.getId()));
@@ -64,7 +64,7 @@ public class AttractionDAO implements DAOInterface {
 
             if (rs.next()) {
                 Attraction attraction = Attraction.fromResultSet(rs);
-                if (attraction == null){
+                if (attraction == null) {
                     return null;
                 }
                 attraction.setHoraireOuvertures(this.getHoraireOuvertureFromAttraction(attraction.getId()));
@@ -79,36 +79,18 @@ public class AttractionDAO implements DAOInterface {
     }
 
     private List<HoraireOuverture> getHoraireOuvertureFromAttraction(int attractionId) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        List<HoraireOuverture> horaires = new ArrayList<>();
+        final String QUERY_STRING = """
+                    SELECT * FROM HoraireOuverture
+                    WHERE attraction_id = ?
+                    ORDER BY jour_semaine ASC
+                """;
 
-        try {
-            conn = DBManager.getInstance().getConnection();
-            String sql = "SELECT * FROM HoraireOuverture WHERE attraction_id = ?";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, attractionId);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                int jour = rs.getInt("jour_semaine");
-                if (jour < 0 || jour > 6){
-                    continue;
-                }
-                JourSemaine jourSemaine = JourSemaine.fromInt(rs.getInt("jour_semaine"));
-                Time ouverture = rs.getTime("heure_ouverture");
-                Time fermeture = rs.getTime("heure_fermeture");
-                horaires.add(new HoraireOuverture(jourSemaine, ouverture, fermeture));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DBManager.getInstance().cleanup(conn, stmt, rs);
-        }
+        Map<Integer, Object> params = new HashMap<>();
+        params.put(1, attractionId);
+        List<HoraireOuverture> horaires = DBRequest.execute(QUERY_STRING, params, HoraireOuverture::fromResultSet);
 
         return horaires;
-    }
+}
 
 }
 
