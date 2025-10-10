@@ -5,6 +5,7 @@ import com.b2z.model.HoraireOuverture;
 import com.b2z.utils.DBManager;
 import com.b2z.utils.DBRequest;
 import com.b2z.utils.JourSemaine;
+import com.b2z.utils.Utils;
 import jakarta.validation.constraints.NotNull;
 
 import java.sql.*;
@@ -33,11 +34,9 @@ public class AttractionDAO implements DAOInterface {
             ON a.type_id = type.id
             WHERE a.id = ?
         """;
-        Map<Integer, Object> params = new HashMap<>();
-        params.put(1, id);
         List<Attraction> result = DBRequest.execute(
                 QUERY_STRING,
-                params,
+                Utils.map(1, id),
                 Attraction::fromResultSet
         );
         Attraction attraction = result.get(0);
@@ -60,9 +59,7 @@ public class AttractionDAO implements DAOInterface {
             WHERE id = ? 
             RETURNING *  
         """;
-        Map<Integer, Object> params = new HashMap<>();
-        params.put(1, id);
-        List<Attraction> result = DBRequest.execute(QUERY_STRING, params, Attraction::fromResultSet);
+        List<Attraction> result = DBRequest.execute(QUERY_STRING, Utils.map(1, id), Attraction::fromResultSet);
         return result.get(0);
     }
 
@@ -72,13 +69,8 @@ public class AttractionDAO implements DAOInterface {
                     WHERE attraction_id = ?
                     ORDER BY jour_semaine ASC
                 """;
-
-        Map<Integer, Object> params = new HashMap<>();
-        params.put(1, attractionId);
-        List<HoraireOuverture> horaires = DBRequest.execute(QUERY_STRING, params, HoraireOuverture::fromResultSet);
-
-        return horaires;
-}
+        return DBRequest.execute(QUERY_STRING, Utils.map(1, attractionId), HoraireOuverture::fromResultSet);
+    }
 
 }
 
