@@ -4,12 +4,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Utils {
-    public static Map<Integer, Object> map(Object... keyValues) {
-        Map<Integer, Object> map = new HashMap<>();
-        for (int i = 0; i < keyValues.length - 1; i += 2) {
-            map.put((Integer) keyValues[i], keyValues[i + 1]);
+
+    public static <K, V> Map<K, V> map(Object... keyValues) {
+        Map<K, V> map = new HashMap<>();
+
+        for (int i = 0; i < keyValues.length; i += 2) {
+            @SuppressWarnings("unchecked")
+            K key = (K) keyValues[i];
+
+            @SuppressWarnings("unchecked")
+            V value = (V) keyValues[i + 1];
+            map.put(key, value);
         }
         return map;
     }
-    ;
+
+
 }

@@ -2,15 +2,10 @@ package com.b2z.dao;
 
 import com.b2z.model.Attraction;
 import com.b2z.model.HoraireOuverture;
-import com.b2z.utils.DBManager;
 import com.b2z.utils.DBRequest;
-import com.b2z.utils.JourSemaine;
 import com.b2z.utils.Utils;
 import jakarta.validation.constraints.NotNull;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
