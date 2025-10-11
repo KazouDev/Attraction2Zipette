@@ -1,8 +1,11 @@
 package com.b2z.model;
 
+import com.b2z.service.ThemeParkAPI;
+
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Attraction {
     private int id;
@@ -12,6 +15,7 @@ public class Attraction {
     private int tailleMinAdulte;
 
     private List<HoraireOuverture> horaireOuvertures;
+    private Integer tempsAttente;
 
     public Attraction(int id, String nom, AttractionType type, int tailleMin, int tailleMinAdulte) {
         this.id = id;
@@ -20,6 +24,10 @@ public class Attraction {
         this.tailleMin = tailleMin;
         this.tailleMinAdulte = tailleMinAdulte;
         this.horaireOuvertures = new ArrayList<>();
+
+        final Map<String, ThemeParkAPI.AttractionCrowd> crowds = ThemeParkAPI.getInstance().getCrowds();
+        ThemeParkAPI.AttractionCrowd data = crowds.get(Integer.toString(this.id));
+        this.tempsAttente = data != null ? data.waitDuration() : 0;
     }
 
     public static Attraction fromResultSet(ResultSet rs) {
@@ -34,6 +42,10 @@ public class Attraction {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public int getTempsAttente() {
+        return this.tempsAttente;
     }
 
     public int getId() {
@@ -74,6 +86,10 @@ public class Attraction {
 
     public void setTailleMinAdulte(int tailleMinAdulte) {
         this.tailleMinAdulte = tailleMinAdulte;
+    }
+
+    public void setTempsAttente(Integer tempsAttente) {
+        this.tempsAttente = tempsAttente;
     }
 
     public List<HoraireOuverture> getHoraireOuvertures() {

@@ -45,24 +45,48 @@ public class ApiClient {
 
     protected JsonElement sendRequest(
             @NotNull HttpMethod method,
-            @Nullable Map<String, String> queryParams
+            @NotNull String endpoint
     ) throws IOException, InterruptedException {
-        return this.sendRequest(method, queryParams, null);
+        return this.sendRequest(method, endpoint, null, null);
     }
 
     protected JsonElement sendRequest(
             @NotNull HttpMethod method,
+            @NotNull Map<String, String> queryParams
+    ) throws IOException, InterruptedException {
+        return this.sendRequest(method, null, queryParams, null);
+    }
+
+    protected JsonElement sendRequest(
+            @NotNull HttpMethod method,
+            @NotNull String endpoint,
+            @NotNull Map<String, String> queryParams
+    ) throws IOException, InterruptedException {
+        return this.sendRequest(method, endpoint, queryParams, null);
+    }
+
+    protected JsonElement sendRequest(
+            @NotNull HttpMethod method,
+            @Nullable String endpoint,
             @Nullable Map<String, String> queryParams,
             @Nullable Gson body
     ) throws IOException, InterruptedException {
         String url = this.baseURL;
+
+        if(endpoint != null) {
+            if(!endpoint.startsWith("/")) {
+                url += "/" + endpoint;
+            } else {
+                url += endpoint;
+            }
+        }
 
         if(queryParams == null) {
             queryParams = new HashMap<>();
         }
 
         if(this.apiKey != null) {
-            queryParams.put("API_KEY", this.apiKey); // berk dans les queries params et pas dans le header
+            queryParams.put("API_KEY", this.apiKey);
         }
 
         if (!queryParams.isEmpty()) {
