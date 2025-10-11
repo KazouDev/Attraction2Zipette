@@ -39,16 +39,20 @@ public class ThemeParkAPI extends ApiClient {
         return this.crowds;
     }
 
-    public void addAttraction(@NotNull String attractionName, @NotNull String attractionCode) throws IOException, InterruptedException {
-        this.sendRequest(
-                HttpMethod.PUT,
-                "/attractions",
-                Utils.map(
-                        "groupName", GROUP_NAME,
-                        "attractionName", attractionName,
-                        "attractionCode", attractionCode
-                )
-        );
+    public void addAttraction(@NotNull String attractionName, @NotNull String attractionCode) {
+        try {
+            this.sendRequest(
+                    HttpMethod.PUT,
+                    "/attractions",
+                    Utils.map(
+                            "groupName", GROUP_NAME,
+                            "attractionName", attractionName,
+                            "attractionCode", attractionCode
+                    )
+            );
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void runTask() {

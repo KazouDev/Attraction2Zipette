@@ -58,26 +58,20 @@ public class AttractionDAO implements DAOInterface<Attraction, AttractionDAO.Att
             INSERT INTO Attraction (nom, type_id, taille_min, taille_min_adulte)
             VALUES (?, ?, ?, ?)
         """;
+         final List<Attraction> result =  DBRequest.execute(
+            QUERY_STRING,
+            Utils.map(
+                    1, props.nom(),
+                    2, props.typeId(),
+                    3, props.tailleMin(),
+                    4, props.tailleMinAdulte()
+            ),
+            Attraction::fromResultSet
+        );
 
-        try {
-            final List<Attraction> result =  DBRequest.execute(
-                QUERY_STRING,
-                Utils.map(
-                        1, props.nom(),
-                        2, props.typeId(),
-                        3, props.tailleMin(),
-                        4, props.tailleMinAdulte()
-                ),
-                Attraction::fromResultSet
-            );
-
-            Attraction attraction = result.get(0);
-            ThemeParkAPI.getInstance().addAttraction(props.nom(), Integer.toString(attraction.getId()));
-            return attraction;
-        } catch(Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        Attraction attraction = result.get(0);
+        ThemeParkAPI.getInstance().addAttraction(props.nom(), Integer.toString(attraction.getId()));
+        return attraction;
     }
 
     @Override
