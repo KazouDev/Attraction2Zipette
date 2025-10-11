@@ -118,10 +118,12 @@ public class ApiClient {
         HttpRequest request = builder.build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+        final String responseBody = response.body();
         if(response.statusCode() != 200) {
-            throw new IOException("Invalid status code returned: " + response.statusCode());
+            throw new IOException("Invalid status code returned: " + response.statusCode() + ": " + responseBody);
         }
-        return JsonParser.parseString(response.body());
+
+        return (responseBody.startsWith("{") || responseBody.startsWith("[")) ? JsonParser.parseString(responseBody) : null;
     }
 
 }

@@ -1,14 +1,12 @@
 package com.b2z.dao;
 
-import com.b2z.model.Attraction;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
-import java.util.Map;
 
-public interface DAOInterface<T> {
+public interface DAOInterface<T, U> {
     List<T> findAll();
     T findById(@NotNull int id);
-    T create(@NotNull Map<String, Object> props);
+    T create(@NotNull U props);
     T delete(@NotNull int id);
 }

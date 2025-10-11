@@ -16,6 +16,7 @@ import java.util.TimerTask;
 public class ThemeParkAPI extends ApiClient {
 
     public record AttractionCrowd(String attractionCode, String attractionName, Integer waitDuration) {}
+    private final String GROUP_NAME = "team1";
     private static ThemeParkAPI instance;
     private final Map<String, AttractionCrowd> crowds;
 
@@ -38,16 +39,16 @@ public class ThemeParkAPI extends ApiClient {
         return this.crowds;
     }
 
-    public JsonObject addAttraction(@NotNull String attractionName, @NotNull String attractionCode) throws IOException, InterruptedException {
-        JsonElement result = this.sendRequest(
+    public void addAttraction(@NotNull String attractionName, @NotNull String attractionCode) throws IOException, InterruptedException {
+        this.sendRequest(
                 HttpMethod.PUT,
                 "/attractions",
                 Utils.map(
+                        "groupName", GROUP_NAME,
                         "attractionName", attractionName,
                         "attractionCode", attractionCode
                 )
         );
-        return result.getAsJsonObject();
     }
 
     private void runTask() {
@@ -55,7 +56,6 @@ public class ThemeParkAPI extends ApiClient {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 try {
-                    final String GROUP_NAME = "team1";
                     JsonElement response = sendRequest(HttpMethod.GET, "/crowds/"+ GROUP_NAME);
                     JsonArray result = response.getAsJsonArray();
 

@@ -1,6 +1,8 @@
 package com.b2z.model;
 
 import com.b2z.service.ThemeParkAPI;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -8,10 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 public class Attraction {
+
     private int id;
+
     private String nom;
+
     private AttractionType type;
+
     private int tailleMin;
+
     private int tailleMinAdulte;
 
     private List<HoraireOuverture> horaireOuvertures;

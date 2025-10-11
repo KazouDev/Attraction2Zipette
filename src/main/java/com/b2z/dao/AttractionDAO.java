@@ -2,14 +2,24 @@ package com.b2z.dao;
 
 import com.b2z.model.Attraction;
 import com.b2z.model.HoraireOuverture;
+import com.b2z.service.ThemeParkAPI;
 import com.b2z.utils.DBRequest;
 import com.b2z.utils.Utils;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 
 import java.util.List;
-import java.util.Map;
 
-public class AttractionDAO implements DAOInterface {
+public class AttractionDAO implements DAOInterface<Attraction, AttractionDAO.AttractionProps> {
+
+    public record AttractionProps(
+            @NotNull @Size(min = 3) String nom,
+            @NotNull Integer typeId,
+            @NotNull @Min(1) Integer tailleMin,
+            @NotNull @Min(1) Integer tailleMinAdulte
+    ) {}
 
     public List<Attraction> findAll() {
         final String QUERY_STRING = """
@@ -43,8 +53,31 @@ public class AttractionDAO implements DAOInterface {
     }
 
     @Override
-    public Attraction create(@NotNull Map props) {
-        return null;
+    public Attraction create(@NotNull AttractionProps props) {
+        final String QUERY_STRING = """
+            INSERT INTO Attraction (nom, type_id, taille_min, taille_min_adulte)
+            VALUES (?, ?, ?, ?)
+        """;
+
+        try {
+            final List<Attraction> result =  DBRequest.execute(
+                QUERY_STRING,
+                Utils.map(
+                        1, props.nom(),
+                        2, props.typeId(),
+                        3, props.tailleMin(),
+                        4, props.tailleMinAdulte()
+                ),
+                Attraction::fromResultSet
+            );
+
+            Attraction attraction = result.get(0);
+            ThemeParkAPI.getInstance().addAttraction(props.nom(), Integer.toString(attraction.getId()));
+            return attraction;
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

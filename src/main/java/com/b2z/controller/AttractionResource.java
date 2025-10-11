@@ -2,13 +2,15 @@ package com.b2z.controller;
 
 import com.b2z.dao.AttractionDAO;
 import com.b2z.model.Attraction;
-import com.b2z.service.ThemeParkAPI;
 import com.google.gson.Gson;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/attractions")
 public class AttractionResource {
@@ -35,11 +37,26 @@ public class AttractionResource {
         return gson.toJson(attraction);
     }
 
-    // create
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Attraction create(@Valid AttractionDAO.AttractionProps attraction) {
+        return attractionDAO.create(attraction);
+    }
 
-    // update
+    // FIXME update
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String update(@PathParam("id") @NotNull int id, String body) {
+        return null;
+        //Gson gson = new Gson();
+        //Attraction updatedData = gson.fromJson(body, Attraction.class);
+        //Attraction updated = attractionDAO.update(id, updatedData);
+        //return gson.toJson(updated);
+    }
 
-    // delete
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)

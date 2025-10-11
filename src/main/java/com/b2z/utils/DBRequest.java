@@ -59,10 +59,16 @@ public class DBRequest {
 
         Connection conn;
         PreparedStatement stmt;
-        ResultSet rs;
+        ResultSet rs = null;
 
+        boolean isInsert = query.trim().toUpperCase().contains("INSERT");
         conn = DBManager.getInstance().getConnection();
-        stmt = conn.prepareStatement(query);
+
+        if (isInsert) {
+            stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+        } else {
+            stmt = conn.prepareStatement(query);
+        }
 
         if(params != null) {
             for(Map.Entry<Integer, Object> entry : params.entrySet()) {
@@ -70,19 +76,51 @@ public class DBRequest {
             }
         }
 
-        rs = stmt.executeQuery();
+        if (query.trim().toUpperCase().contains("SELECT")) {
+            rs = stmt.executeQuery();
+            if (callback != null) {
+                while (rs.next()) {
+                    T result = callback.apply(rs);
+                    if (result != null) {
+                        results.add(result);
+                    }
+                }
 
-        if(callback != null) {
-            while (rs.next()) {
-                T result = callback.apply(rs);
-                if(result != null) {
-                    results.add(result);
+                DBManager.getInstance().cleanup(conn, stmt, rs);
+                return results;
+            }
+        } else if (isInsert) {
+            stmt.executeUpdate();
+            ResultSet generatedKeys = stmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int id = generatedKeys.getInt(1);
+                String tableName = extractTableNameFromInsert(query);
+
+                if (tableName != null) {
+                    String selectQuery = "SELECT * FROM " + tableName + " WHERE id = ?";
+                    List<T> selectResults = execute(selectQuery, Map.of(1, id), callback);
+                    DBManager.getInstance().cleanup(conn, stmt, generatedKeys);
+                    return selectResults;
+                } else {
+                    DBManager.getInstance().cleanup(conn, stmt, generatedKeys);
+                    return null;
                 }
             }
-            return results;
+        } else {
+            stmt.executeUpdate();
+            DBManager.getInstance().cleanup(conn, stmt, rs);
+            return null;
         }
-        DBManager.getInstance().cleanup(conn, stmt, rs);
         return null;
+    }
+
+    private static String extractTableNameFromInsert(String query) {
+        String upper = query.toUpperCase();
+        int idx = upper.indexOf("INSERT INTO");
+        if (idx == -1) return null;
+        String afterInsert = query.substring(idx + "INSERT INTO".length()).trim();
+        String[] parts = afterInsert.split("\\s+|\\(");
+        return parts.length > 0 ? parts[0] : null;
     }
 
 }
