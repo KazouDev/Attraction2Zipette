@@ -48,4 +48,4 @@ db_data
 
 local_bdd
 entrypoint
-./docker-compose.yml
+docker-compose.yml
