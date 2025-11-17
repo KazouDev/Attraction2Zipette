@@ -7,8 +7,10 @@ import jakarta.validation.constraints.NotNull;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Attraction {
 
@@ -31,6 +33,9 @@ public class Attraction {
 
     private List<HoraireOuverture> horaireOuvertures;
     private Integer tempsAttente;
+
+    // HashSet pour dédoublonnage O(1) des horaires
+    private final Set<String> horaireKeys = new HashSet<>();
 
     public Attraction(int id, String nom, AttractionType type, int tailleMin, int tailleMinAdulte) {
         this.id = id;
@@ -112,18 +117,39 @@ public class Attraction {
         this.tempsAttente = tempsAttente;
     }
 
+    /**
+     * Ajoute un horaire si il n'existe pas déjà (évite les doublons)
+     * Complexité: O(1) grâce au HashSet
+     */
+    public void addHoraireOuvertureIfNotPresent(HoraireOuverture horaire) {
+        if (horaire == null) return;
+
+        // Créer une clé unique pour l'horaire (jour + heures)
+        String key = horaire.getJourSemaine().getValeur() + "_" +
+                horaire.getHeureOuverture().toString() + "_" +
+                horaire.getHeureFermeture().toString();
+
+        // Vérification O(1) au lieu de O(n)
+        if (horaireKeys.add(key)) {
+            horaireOuvertures.add(horaire);
+        }
+    }
+
+    public void addHoraireOuverture(HoraireOuverture horaireOuverture) {
+        addHoraireOuvertureIfNotPresent(horaireOuverture);
+    }
+
     public List<HoraireOuverture> getHoraireOuvertures() {
         return horaireOuvertures;
     }
 
     public void setHoraireOuvertures(List<HoraireOuverture> horaireOuvertures) {
-        this.horaireOuvertures = horaireOuvertures;
-    }
-
-    public void addHoraireOuverture(HoraireOuverture horaireOuverture) {
-        this.horaireOuvertures.add(horaireOuverture);
+        this.horaireOuvertures.clear();
+        this.horaireKeys.clear();
+        for (HoraireOuverture h : horaireOuvertures) {
+            addHoraireOuvertureIfNotPresent(h);
+        }
     }
 
 
 }
-

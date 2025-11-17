@@ -92,11 +92,11 @@ public class DBRequest {
             }
 
             long e0 = System.nanoTime();
-            System.out.println("Executing query at time : " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+            System.out.println("Executing query (" + query + ")at time : " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
             rs = stmt.executeQuery();
             long e1 = System.nanoTime();
             long execMs = (e1 - e0) / 1_000_000;
-            System.out.println("Query executed in " + execMs + "ms at " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+            System.out.println("Query (" + query + "executed in " + execMs + "ms at " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
             long totalMs = (e1 - t0) / 1_000_000;
             System.out.println("Total select time (acquire+prepare+execute) = " + totalMs + "ms");
             while (rs.next()) {

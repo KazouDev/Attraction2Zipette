@@ -11,8 +11,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,37 +34,99 @@ public class AttractionDAO implements DAOInterface<Attraction, AttractionDAO.Att
     ) {}
 
     public List<Attraction> findAll() {
-        final String QUERY_STRING = """
+        final String QUERY_ATTRACTIONS = """
             SELECT %s
             FROM Attraction attraction
-            LEFT JOIN AttractionType attraction_type
-            ON attraction.type_id = attraction_type.id
+            LEFT JOIN AttractionType attraction_type ON attraction.type_id = attraction_type.id
+            ORDER BY attraction.id
         """.formatted(Attraction.getSelectColumns());
-        return DBRequest
-                .executeSelect(QUERY_STRING, null, Attraction::fromResultSet)
-                .stream()
-                .peek(s -> s.setHoraireOuvertures(getHoraireOuvertureFromAttraction(s.getId())))
-                .toList();
+
+        List<Attraction> attractions = DBRequest.executeSelect(QUERY_ATTRACTIONS, null, Attraction::fromResultSet);
+
+        if (attractions == null || attractions.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Map<Integer, Attraction> attractionsById = new HashMap<>();
+        for (Attraction attraction : attractions) {
+            attractionsById.put(attraction.getId(), attraction);
+        }
+
+        String attractionIds = attractions.stream()
+                .map(a -> String.valueOf(a.getId()))
+                .collect(java.util.stream.Collectors.joining(","));
+
+        final String QUERY_HORAIRES = """
+            SELECT %s, horaire_ouverture.attraction_id
+            FROM HoraireOuverture %s
+            WHERE horaire_ouverture.attraction_id IN (%s)
+            ORDER BY horaire_ouverture.attraction_id, horaire_ouverture.jour_semaine ASC
+        """.formatted(
+                HoraireOuverture.SELECT_COLUMNS,
+                HoraireOuverture.ALIAS_NAME,
+                attractionIds
+        );
+
+        DBRequest.executeSelect(QUERY_HORAIRES, null, rs -> {
+            try {
+                int attractionId = rs.getInt("attraction_id");
+                HoraireOuverture horaire = HoraireOuverture.fromResultSet(rs);
+
+                if (horaire != null) {
+                    Attraction attraction = attractionsById.get(attractionId);
+                    if (attraction != null) {
+                        attraction.addHoraireOuvertureIfNotPresent(horaire);
+                    }
+                }
+                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+
+
+        return attractions;
     }
 
     public Attraction findById(@NotNull int id) {
-        final String QUERY_STRING = """
+        final String QUERY_ATTRACTION = """
             SELECT %s
             FROM Attraction attraction
-            LEFT JOIN AttractionType attraction_type
-            ON attraction.type_id = attraction_type.id
+            LEFT JOIN AttractionType attraction_type ON attraction.type_id = attraction_type.id
             WHERE attraction.id = ?
         """.formatted(Attraction.getSelectColumns());
-        List<Attraction> result = DBRequest.executeSelect(
-                QUERY_STRING,
-                Utils.map(1, id),
-                Attraction::fromResultSet
-        );
-        if (result == null || result.isEmpty()) {
+
+        List<Attraction> attractions = DBRequest.executeSelect(QUERY_ATTRACTION, Utils.map(1, id), Attraction::fromResultSet);
+
+        if (attractions == null || attractions.isEmpty()) {
             throw new IllegalArgumentException("Attraction introuvable");
         }
-        Attraction attraction = result.get(0);
-        attraction.setHoraireOuvertures(this.getHoraireOuvertureFromAttraction(attraction.getId()));
+
+        Attraction attraction = attractions.get(0);
+
+        final String QUERY_HORAIRES = """
+            SELECT %s
+            FROM HoraireOuverture %s
+            WHERE %s.attraction_id = ?
+            ORDER BY %s.jour_semaine ASC
+        """.formatted(
+                HoraireOuverture.SELECT_COLUMNS,
+                HoraireOuverture.ALIAS_NAME,
+                HoraireOuverture.ALIAS_NAME,
+                HoraireOuverture.ALIAS_NAME
+        );
+
+        List<HoraireOuverture> horaires = DBRequest.executeSelect(
+                QUERY_HORAIRES,
+                Utils.map(1, id),
+                HoraireOuverture::fromResultSet
+        );
+
+        if (horaires != null) {
+            attraction.getHoraireOuvertures().addAll(horaires);
+        }
+
         return attraction;
     }
 
@@ -122,21 +185,6 @@ public class AttractionDAO implements DAOInterface<Attraction, AttractionDAO.Att
             ThemeParkAPI.getInstance().removeAttraction(Integer.toString(id));
             return result;
         }
-    }
-
-    private List<HoraireOuverture> getHoraireOuvertureFromAttraction(int attractionId) {
-        final String QUERY_STRING = """
-                    SELECT %s
-                    FROM HoraireOuverture %s
-                    WHERE %s.attraction_id = ?
-                    ORDER BY %s.jour_semaine ASC
-                """.formatted(
-                        HoraireOuverture.SELECT_COLUMNS,
-                        HoraireOuverture.ALIAS_NAME,
-                        HoraireOuverture.ALIAS_NAME,
-                        HoraireOuverture.ALIAS_NAME
-                );
-        return DBRequest.executeSelect(QUERY_STRING, Utils.map(1, attractionId), HoraireOuverture::fromResultSet);
     }
 
     public IdResponse updatePartial(int id, Map<String, Object> updates) {
@@ -201,4 +249,3 @@ public class AttractionDAO implements DAOInterface<Attraction, AttractionDAO.Att
         return new IdResponse(attractionId);
     }
 }
-

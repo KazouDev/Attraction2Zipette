@@ -4,6 +4,7 @@ import com.b2z.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Spectacle {
     private int id;
@@ -34,6 +35,43 @@ public class Spectacle {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void addProgrammationIfNotExists(Programmation programmation) {
+        if (programmation == null) return;
+
+        boolean exists = programmations.stream().anyMatch(p ->
+                p.getJourSemaine().equals(programmation.getJourSemaine()) &&
+                        p.getHeureOuverture().equals(programmation.getHeureOuverture()) &&
+                        p.getHeureFermeture().equals(programmation.getHeureFermeture())
+        );
+
+        if (!exists) {
+            programmations.add(programmation);
+        }
+    }
+
+    public void addPersonnageIfNotExists(Personnage personnage) {
+        if (personnage == null) return;
+
+        boolean exists = personnages.stream().anyMatch(p -> p.getId() == personnage.getId());
+
+        if (!exists) {
+            personnages.add(personnage);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Spectacle spectacle = (Spectacle) o;
+        return id == spectacle.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public Lieu getLieu() {
@@ -76,4 +114,3 @@ public class Spectacle {
         this.programmations = programmations;
     }
 }
-

@@ -22,14 +22,23 @@ public class HoraireOuverture extends Horaire {
 
     public static HoraireOuverture fromResultSet(ResultSet rs) {
         try {
-
             int jour = rs.getInt("horaire_ouverture_jour_semaine");
+
+            // Si le résultat est NULL (LEFT JOIN sans correspondance), rs.getInt retourne 0
+            // On vérifie aussi que les heures ne sont pas NULL
+            Time ouverture = rs.getTime("horaire_ouverture_heure_ouverture");
+            Time fermeture = rs.getTime("horaire_ouverture_heure_fermeture");
+
+            // Si les heures sont NULL, c'est qu'il n'y a pas d'horaire (LEFT JOIN)
+            if (ouverture == null || fermeture == null) {
+                return null;
+            }
+
             if (jour < 0 || jour > 6) {
                 return null;
             }
+
             JourSemaine jourSemaine = JourSemaine.fromInt(jour);
-            Time ouverture = rs.getTime("horaire_ouverture_heure_ouverture");
-            Time fermeture = rs.getTime("horaire_ouverture_heure_fermeture");
             return new HoraireOuverture(jourSemaine, ouverture, fermeture);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -37,4 +46,3 @@ public class HoraireOuverture extends Horaire {
         }
     }
 }
-

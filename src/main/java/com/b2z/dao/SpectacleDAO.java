@@ -10,8 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.sql.Time;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.SpectacleProps> {
 
@@ -40,54 +39,159 @@ public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.Specta
 
     @Override
     public List<Spectacle> findAll() {
-        final String QUERY_STRING = """
+        final String QUERY_SPECTACLES = """
             SELECT %s
             FROM Spectacle %s
             INNER JOIN Lieu %s ON %s.lieu_id = %s.id
-        """.formatted(Spectacle.SELECT_COLUMNS, Spectacle.ALIAS_NAME,
-                Lieu.ALIAS_NAME, Spectacle.ALIAS_NAME, Lieu.ALIAS_NAME);
-        return DBRequest.executeSelect(QUERY_STRING, null, Spectacle::fromResultSet)
-                .stream()
-                .peek(s -> {
-                    s.setProgrammations(getProgrammationFromSpectacle(s.getId()));
-                    s.setPersonnages(getPersonnagesFromSpectacle(s.getId()));
-                })
-                .toList();
+            ORDER BY %s.id
+        """.formatted(
+                Spectacle.SELECT_COLUMNS,
+                Spectacle.ALIAS_NAME,
+                Lieu.ALIAS_NAME, Spectacle.ALIAS_NAME, Lieu.ALIAS_NAME,
+                Spectacle.ALIAS_NAME
+        );
+
+        List<Spectacle> spectacles = DBRequest.executeSelect(QUERY_SPECTACLES, null, Spectacle::fromResultSet);
+
+        if (spectacles == null || spectacles.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        HashMap<Integer, Spectacle> spectaclesById = new HashMap<>();
+        for (Spectacle spectacle : spectacles) {
+            spectaclesById.put(spectacle.getId(), spectacle);
+        }
+
+        String spectacleIds = spectacles.stream()
+                .map(s -> String.valueOf(s.getId()))
+                .collect(java.util.stream.Collectors.joining(","));
+
+        final String QUERY_PROGRAMMATIONS = """
+            SELECT %s, programmation.spectacle_id
+            FROM Programmation %s
+            WHERE programmation.spectacle_id IN (%s)
+            ORDER BY programmation.spectacle_id, %s.jour_semaine ASC
+        """.formatted(
+                Programmation.SELECT_COLUMNS,
+                Programmation.ALIAS_NAME,
+                spectacleIds,
+                Programmation.ALIAS_NAME
+        );
+
+        DBRequest.executeSelect(QUERY_PROGRAMMATIONS, null, rs -> {
+            try {
+                int spectacleId = rs.getInt("spectacle_id");
+                Programmation prog = Programmation.fromResultSet(rs);
+                if (prog != null) {
+                    Spectacle spec = spectaclesById.get(spectacleId);
+                    if (spec != null) {
+                        spec.addProgrammationIfNotExists(prog);
+                    }
+                }
+                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+
+        final String QUERY_PERSONNAGES = """
+            SELECT %s, sp.spectacle_id
+            FROM Personnage %s
+            INNER JOIN SpectaclePersonnage sp ON sp.personnage_id = %s.id
+            WHERE sp.spectacle_id IN (%s)
+            ORDER BY sp.spectacle_id, %s.id ASC
+        """.formatted(
+                Personnage.SELECT_COLUMNS,
+                Personnage.ALIAS_NAME,
+                Personnage.ALIAS_NAME,
+                spectacleIds,
+                Personnage.ALIAS_NAME
+        );
+
+        DBRequest.executeSelect(QUERY_PERSONNAGES, null, rs -> {
+            try {
+                int spectacleId = rs.getInt("spectacle_id");
+                Personnage perso = Personnage.fromResultSet(rs);
+                if (perso != null) {
+                    Spectacle spec = spectaclesById.get(spectacleId);
+                    if (spec != null) {
+                        spec.addPersonnageIfNotExists(perso);
+                    }
+                }
+                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+
+        return spectacles;
     }
 
     @Override
     public Spectacle findById(int id) {
-        final String QUERY_STRING = """
+        final String QUERY_SPECTACLE = """
             SELECT %s
             FROM Spectacle %s
             INNER JOIN Lieu %s ON %s.lieu_id = %s.id
             WHERE %s.id = ?
-        """.formatted(Spectacle.SELECT_COLUMNS, Spectacle.ALIAS_NAME,
-                Lieu.ALIAS_NAME, Spectacle.ALIAS_NAME, Lieu.ALIAS_NAME, Spectacle.ALIAS_NAME);
+        """.formatted(
+                Spectacle.SELECT_COLUMNS,
+                Spectacle.ALIAS_NAME,
+                Lieu.ALIAS_NAME, Spectacle.ALIAS_NAME, Lieu.ALIAS_NAME,
+                Spectacle.ALIAS_NAME
+        );
 
-        List<Spectacle> result = DBRequest.executeSelect(QUERY_STRING, Utils.map(1, id), Spectacle::fromResultSet);
-        if (result == null || result.isEmpty()) {
+        List<Spectacle> spectacles = DBRequest.executeSelect(QUERY_SPECTACLE, Utils.map(1, id), Spectacle::fromResultSet);
+
+        if (spectacles == null || spectacles.isEmpty()) {
             throw new IllegalArgumentException("Spectacle introuvable");
         }
 
-        Spectacle spectacle = result.get(0);
-        spectacle.setPersonnages(getPersonnagesFromSpectacle(spectacle.getId()));
-        spectacle.setProgrammations(getProgrammationFromSpectacle(spectacle.getId()));
-        return spectacle;
-    }
+        Spectacle spectacle = spectacles.get(0);
 
-    private List<Personnage> getPersonnagesFromSpectacle(int spectacleId) {
-        final String QUERY_STRING = """
-        SELECT %s
-        FROM Personnage %s
-        INNER JOIN SpectaclePersonnage sp ON sp.personnage_id = %s.id
-        WHERE sp.spectacle_id = ?
-    """.formatted(
+        final String QUERY_PROGRAMMATIONS = """
+            SELECT %s
+            FROM Programmation %s
+            WHERE %s.spectacle_id = ?
+            ORDER BY %s.jour_semaine ASC
+        """.formatted(
+                Programmation.SELECT_COLUMNS,
+                Programmation.ALIAS_NAME,
+                Programmation.ALIAS_NAME,
+                Programmation.ALIAS_NAME
+        );
+
+        List<Programmation> programmations = DBRequest.executeSelect(
+                QUERY_PROGRAMMATIONS,
+                Utils.map(1, id),
+                Programmation::fromResultSet
+        );
+
+        final String QUERY_PERSONNAGES = """
+            SELECT %s
+            FROM Personnage %s
+            INNER JOIN SpectaclePersonnage sp ON sp.personnage_id = %s.id
+            WHERE sp.spectacle_id = ?
+            ORDER BY %s.id ASC
+        """.formatted(
                 Personnage.SELECT_COLUMNS,
+                Personnage.ALIAS_NAME,
                 Personnage.ALIAS_NAME,
                 Personnage.ALIAS_NAME
         );
-        return DBRequest.executeSelect(QUERY_STRING, Utils.map(1, spectacleId), Personnage::fromResultSet);
+
+        List<Personnage> personnages = DBRequest.executeSelect(
+                QUERY_PERSONNAGES,
+                Utils.map(1, id),
+                Personnage::fromResultSet
+        );
+
+        spectacle.setProgrammations(programmations != null ? programmations : new ArrayList<>());
+        spectacle.setPersonnages(personnages != null ? personnages : new ArrayList<>());
+
+        return spectacle;
     }
 
     @Override
@@ -152,20 +256,6 @@ public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.Specta
         return result;
     }
 
-    private List<Programmation> getProgrammationFromSpectacle(int spectacleId) {
-        final String QUERY_STRING = """
-                    SELECT %s
-                    FROM Programmation %s
-                    WHERE %s.spectacle_id = ?
-                    ORDER BY %s.jour_semaine ASC
-                """.formatted(
-                Programmation.SELECT_COLUMNS,
-                Programmation.ALIAS_NAME,
-                Programmation.ALIAS_NAME,
-                Programmation.ALIAS_NAME
-        );
-        return DBRequest.executeSelect(QUERY_STRING, Utils.map(1, spectacleId), Programmation::fromResultSet);
-    }
 
     public IdResponse addProgrammation(int spectacleId, ProgrammationProps props) {
         final String CHECK_SPECTACLE = """
@@ -556,6 +646,36 @@ public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.Specta
         else {
             return 0;
         }
+    }
+
+    // Méthodes privées encore nécessaires pour setProgrammation() et addPersonnage()
+    private List<Personnage> getPersonnagesFromSpectacle(int spectacleId) {
+        final String QUERY_STRING = """
+        SELECT %s
+        FROM Personnage %s
+        INNER JOIN SpectaclePersonnage sp ON sp.personnage_id = %s.id
+        WHERE sp.spectacle_id = ?
+    """.formatted(
+                Personnage.SELECT_COLUMNS,
+                Personnage.ALIAS_NAME,
+                Personnage.ALIAS_NAME
+        );
+        return DBRequest.executeSelect(QUERY_STRING, Utils.map(1, spectacleId), Personnage::fromResultSet);
+    }
+
+    private List<Programmation> getProgrammationFromSpectacle(int spectacleId) {
+        final String QUERY_STRING = """
+                    SELECT %s
+                    FROM Programmation %s
+                    WHERE %s.spectacle_id = ?
+                    ORDER BY %s.jour_semaine ASC
+                """.formatted(
+                Programmation.SELECT_COLUMNS,
+                Programmation.ALIAS_NAME,
+                Programmation.ALIAS_NAME,
+                Programmation.ALIAS_NAME
+        );
+        return DBRequest.executeSelect(QUERY_STRING, Utils.map(1, spectacleId), Programmation::fromResultSet);
     }
 
     public IdResponse removePersonnage(int spectacleId, int personnageId) {
