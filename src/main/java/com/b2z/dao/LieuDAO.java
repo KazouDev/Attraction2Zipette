@@ -7,6 +7,8 @@ import com.b2z.utils.Utils;
 
 import java.util.List;
 import java.util.Map;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class LieuDAO implements DAOInterface<Lieu, LieuDAO.LieuProps> {
 
@@ -16,10 +18,14 @@ public class LieuDAO implements DAOInterface<Lieu, LieuDAO.LieuProps> {
 
     @Override
     public List<Lieu> findAll() {
+        String now = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        System.out.println("LieuDAO.findAll start at : " + now);
+
         final String QUERY_STRING = """
             SELECT %s
             FROM Lieu %s
         """.formatted(Lieu.SELECT_COLUMNS, Lieu.ALIAS_NAME);
+
         return DBRequest.executeSelect(QUERY_STRING, null, Lieu::fromResultSet);
     }
 

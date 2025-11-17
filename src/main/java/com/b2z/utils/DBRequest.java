@@ -5,7 +5,10 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 import java.sql.*;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -30,7 +33,11 @@ public class DBRequest {
                 if (callback == null) {
                     throw new IllegalArgumentException("Callback required for SELECT queries");
                 }
-                return select(query, params, callback);
+                System.out.println("call sub select " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+                List<T> l = select(query, params, callback);
+                System.out.println("end call sub select at " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+
+                return l;
             }
             return new ArrayList<>();
         } catch (SQLException e) {
@@ -57,8 +64,24 @@ public class DBRequest {
             @NotNull Function<ResultSet, T> callback
     ) throws SQLException {
         List<T> results = new ArrayList<>();
+        // Mesurer le temps d'acquisition de la connexion
+        long t0 = System.nanoTime();
         Connection conn = DBManager.getInstance().getConnection();
+        long t1 = System.nanoTime();
+        long acquireMs = (t1 - t0) / 1_000_000;
+        System.out.println("Connection acquired at " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")) + " (acquireMs=" + acquireMs + "ms)");
+
+        if (conn == null) {
+            throw new SQLException("Unable to obtain DB connection");
+        }
+
+        // Préparer la requête et mesurer le temps de préparation
+        long p0 = System.nanoTime();
         PreparedStatement stmt = conn.prepareStatement(query);
+        long p1 = System.nanoTime();
+        long prepareMs = (p1 - p0) / 1_000_000;
+        System.out.println("Prepared statement in " + prepareMs + "ms at " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+
         ResultSet rs = null;
 
         try {
@@ -68,7 +91,14 @@ public class DBRequest {
                 }
             }
 
+            long e0 = System.nanoTime();
+            System.out.println("Executing query at time : " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
             rs = stmt.executeQuery();
+            long e1 = System.nanoTime();
+            long execMs = (e1 - e0) / 1_000_000;
+            System.out.println("Query executed in " + execMs + "ms at " + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+            long totalMs = (e1 - t0) / 1_000_000;
+            System.out.println("Total select time (acquire+prepare+execute) = " + totalMs + "ms");
             while (rs.next()) {
                 T result = callback.apply(rs);
                 if (result != null) {
@@ -76,8 +106,9 @@ public class DBRequest {
                 }
             }
             return results;
-        } finally {
-            DBManager.getInstance().cleanup(conn, stmt, rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
 
@@ -122,8 +153,9 @@ public class DBRequest {
             }
 
             return null;
-        } finally {
-            DBManager.getInstance().cleanup(conn, stmt, generatedKeys);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

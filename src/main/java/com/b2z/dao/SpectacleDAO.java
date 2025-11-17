@@ -7,6 +7,7 @@ import com.b2z.utils.Utils;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.sql.Time;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.Map;
 public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.SpectacleProps> {
 
     public record SpectacleProps(
-            @NotNull String titre,
+            @NotNull @Size(min = 3, max = 30) String titre,
             @NotNull int lieuId
     ) {}
 

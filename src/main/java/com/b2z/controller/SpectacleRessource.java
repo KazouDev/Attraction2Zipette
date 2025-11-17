@@ -9,6 +9,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/spectacles")
 public class SpectacleRessource {
@@ -69,6 +70,14 @@ public class SpectacleRessource {
             @PathParam("personnageId") @NotNull int personnageId
     ) {
         return spectacleDAO.removePersonnage(spectacleId, personnageId);
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public IdResponse update(@PathParam("id") @NotNull int id, @NotNull Map<String, Object> partialData) {
+        return spectacleDAO.update(id, partialData);
     }
 
 }

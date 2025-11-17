@@ -1,5 +1,6 @@
 package com.b2z;
 
+import com.b2z.utils.DBManager;
 import com.fasterxml.jackson.core.util.JacksonFeature;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -20,6 +21,10 @@ public class AppConfig extends ResourceConfig {
         register(JacksonFeature.class);
 
         register(CORSFilter.class);
+
+        if (DBManager.getInstance() == null) {
+            throw new RuntimeException("Failed to initialize database connection.");
+        }
     }
 
     @Provider

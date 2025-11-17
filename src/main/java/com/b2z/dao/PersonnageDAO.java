@@ -3,6 +3,8 @@ package com.b2z.dao;
 import com.b2z.model.Personnage;
 import com.b2z.model.Programmation;
 import com.b2z.utils.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,8 +15,8 @@ import java.util.stream.Collectors;
 public class PersonnageDAO implements DAOInterface<Personnage, PersonnageDAO.PersonnageProps> {
 
     public record PersonnageProps(
-            String nom
-    ) {}
+            @NotNull @Size(min = 3, max = 30) String nom
+            ) {}
 
     @Override
     public List<Personnage> findAll() {

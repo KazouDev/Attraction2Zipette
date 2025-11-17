@@ -20,10 +20,10 @@ import java.util.Map;
 public class AttractionDAO implements DAOInterface<Attraction, AttractionDAO.AttractionProps> {
 
     public record AttractionProps(
-            @NotNull @Size(min = 3) String nom,
+            @NotNull @Size(min = 3, max = 30) String nom,
             @NotNull Integer typeId,
-            @NotNull @Min(1) Integer tailleMin,
-            @NotNull @Min(1) Integer tailleMinAdulte
+            @NotNull @Min(1) @Max(200) Integer tailleMin,
+            @NotNull @Min(1) @Max(200) Integer tailleMinAdulte
     ) {}
 
     public record HoraireOuvertureProps(

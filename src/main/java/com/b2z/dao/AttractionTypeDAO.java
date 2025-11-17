@@ -3,6 +3,8 @@ package com.b2z.dao;
 import com.b2z.model.AttractionType;
 import com.b2z.utils.DBRequest;
 import com.b2z.utils.Utils;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +12,7 @@ import java.util.Map;
 public class AttractionTypeDAO implements DAOInterface<AttractionType, AttractionTypeDAO.AttractionTypeProps> {
 
     public record AttractionTypeProps(
-            String nom
+            @NotNull @Size(min = 3, max = 30) String nom
     ) {}
 
     @Override
