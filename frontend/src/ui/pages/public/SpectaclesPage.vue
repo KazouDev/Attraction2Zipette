@@ -15,7 +15,6 @@
       </div>
     </header>
 
-    <!-- ErrorMessage supprimé, erreurs affichées via toasts -->
     <LoaderOverlay :visible="spectacleStore.loading" />
 
     <section v-if="filteredSpectacles.length > 0" class="grid">

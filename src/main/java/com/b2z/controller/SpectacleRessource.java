@@ -80,4 +80,11 @@ public class SpectacleRessource {
         return spectacleDAO.update(id, partialData);
     }
 
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public IdResponse deleteSpectacle(@PathParam("id") @NotNull int id) {
+        return spectacleDAO.delete(id);
+    }
+
 }

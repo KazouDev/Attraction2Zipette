@@ -74,6 +74,10 @@ export const spectacleApi = {
       `/spectacles/personnages/${spectacleId}/${personnageId}`
     );
     return data;
+  },
+  async delete(id: number): Promise<IdResponse> {
+    const { data } = await httpClient.delete<IdResponse>(`/spectacles/${id}`);
+    return data;
   }
 };
 

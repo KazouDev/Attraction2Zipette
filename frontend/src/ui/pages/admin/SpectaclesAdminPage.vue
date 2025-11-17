@@ -43,6 +43,17 @@
           <template #submit-label>
             {{ selectedId ? 'Mettre à jour' : 'Créer' }}
           </template>
+          <template #secondary-action>
+            <button
+              v-if="selectedId"
+              class="btn btn--danger"
+              type="button"
+              @click="handleDelete"
+              :disabled="deleting || savingDetails"
+            >
+              Supprimer
+            </button>
+          </template>
         </SpectacleForm>
 
         <HoraireListEditor
@@ -89,7 +100,7 @@ import HoraireListEditor from '@/ui/components/forms/HoraireListEditor.vue';
 import SpectacleForm from '@/ui/components/forms/SpectacleForm.vue';
 import PersonnageListEditor from '@/ui/components/forms/PersonnageListEditor.vue';
 import LoaderOverlay from '@/ui/components/LoaderOverlay.vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 interface SpectacleFormState {
   titre: string;
@@ -111,6 +122,7 @@ const selectedId = ref<number | null>(null);
 const savingDetails = ref(false);
 const savingProgrammations = ref(false);
 const savingPersonnages = ref(false);
+const deleting = ref(false);
 
 const formModel = ref<SpectacleFormState>(createEmptyForm());
 const programmationsModel = ref<ProgrammationFormState[]>([]);
@@ -242,6 +254,27 @@ const handleRemovePersonnage = async (personnageId: number) => {
     }
   } finally {
     savingPersonnages.value = false;
+  }
+};
+
+const handleDelete = async () => {
+  if (!selectedId.value) return;
+  const spectacle = spectacleStore.byId(selectedId.value);
+  if (!spectacle) return;
+  const name = spectacle?.titre ?? 'ce spectacle';
+  const ok = window.confirm(`Supprimer "${name}" ? Cette action est irréversible.`);
+  if (!ok) return;
+  deleting.value = true;
+  try {
+    const res = await spectacleStore.remove(spectacle.id);
+    if (res) {
+      selectedId.value = null;
+      formModel.value = createEmptyForm();
+      programmationsModel.value = [];
+      personnagesModel.value = [];
+    }
+  } finally {
+    deleting.value = false;
   }
 };
 
@@ -420,6 +453,11 @@ function ensureSeconds(value: string): string {
 .btn--ghost {
   background: none;
   border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
 }
 
 .btn:disabled {

@@ -224,6 +224,7 @@ public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.Specta
             DELETE FROM Spectacle
             WHERE id = ?
         """;
+        System.out.println("id : " + id);
         IdResponse result = DBRequest.executeCommand(QUERY_STRING, Utils.map(1, id));
         if (result == null) {
             throw new IllegalArgumentException("Spectacle introuvable");

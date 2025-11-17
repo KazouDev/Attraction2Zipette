@@ -37,7 +37,9 @@ CREATE TABLE IF NOT EXISTS Personnage (
 
 CREATE TABLE IF NOT EXISTS Spectacle (
                                          id INT PRIMARY KEY AUTO_INCREMENT,
-                                         titre VARCHAR(100) NOT NULL
+                                         titre VARCHAR(100) NOT NULL,
+                                         lieu_id INT NOT NULL,
+                                         FOREIGN KEY (lieu_id) REFERENCES Lieu(id)
     );
 
 CREATE TABLE IF NOT EXISTS Programmation (

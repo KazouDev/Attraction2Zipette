@@ -143,6 +143,22 @@ export const useSpectacleStore = defineStore('spectacles', () => {
     }
   };
 
+  const remove = async (id: number): Promise<IdResponse | null> => {
+    try {
+      const response = await spectacleApi.delete(id);
+      const index = items.value.findIndex((item: Spectacle) => item.id === id);
+      if (index !== -1) {
+        items.value.splice(index, 1);
+      }
+      notify.success('Spectacle supprimé avec succès');
+      return response;
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Suppression du spectacle impossible';
+      notify.error(error.value);
+      return null;
+    }
+  };
+
   return {
     items,
     loading,
@@ -156,6 +172,7 @@ export const useSpectacleStore = defineStore('spectacles', () => {
     setProgrammations,
     addProgrammation,
     addPersonnage,
-    removePersonnage
+    removePersonnage,
+    remove
   };
 });
