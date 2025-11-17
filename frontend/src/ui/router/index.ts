@@ -8,6 +8,7 @@ import AttractionsPage from '@/ui/pages/public/AttractionsPage.vue';
 import HomePage from '@/ui/pages/public/HomePage.vue';
 import SpectaclesPage from '@/ui/pages/public/SpectaclesPage.vue';
 import RencontresPage from '@/ui/pages/public/RencontresPage.vue';
+import StatsPage from '@/ui/pages/public/StatsPage.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -21,6 +22,7 @@ const router = createRouter({
         { path: '', name: 'home', component: HomePage },
         { path: 'attractions', name: 'public-attractions', component: AttractionsPage },
         { path: 'spectacles', name: 'public-spectacles', component: SpectaclesPage },
+        { path: 'stats', name: 'public-stats', component: StatsPage },
         { path: 'rencontres', name: 'public-rencontres', component: RencontresPage }
       ]
     },

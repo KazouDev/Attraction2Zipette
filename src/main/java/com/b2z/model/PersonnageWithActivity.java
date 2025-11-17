@@ -33,4 +33,16 @@ public class PersonnageWithActivity {
     public long getTotalActivityDuration() {
         return total_duration;
     }
+
+    public int getPersonnageId() {
+        return personnage != null ? personnage.getId() : 0;
+    }
+
+    public String getPersonnageNom() {
+        return personnage != null ? personnage.getNom() : null;
+    }
+
+    public long getTotalActivity() {
+        return total_duration;
+    }
 }

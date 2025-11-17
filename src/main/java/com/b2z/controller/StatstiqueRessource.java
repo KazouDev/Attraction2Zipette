@@ -1,6 +1,7 @@
 package com.b2z.controller;
 
 import com.b2z.dao.StatistiqueDAO;
+import com.b2z.dao.StatistiqueDAO.SpectacleWithDuration;
 import com.b2z.model.PersonnageWithActivity;
 import jakarta.ws.rs.*;
 
@@ -18,5 +19,14 @@ public class StatstiqueRessource {
         return statistiqueDAO.getTopPersonnagesActivity(limit);
     }
 
+    @GET
+    @Path("/spectacles")
+    @Produces("application/json")
+    public List<SpectacleWithDuration> getSpectaclesRanking(@QueryParam("day") Integer day) {
+        if (day == null) {
+            return statistiqueDAO.getSpectaclesRankingByDurationAllDays();
+        }
+        return statistiqueDAO.getSpectaclesRankingByDurationForDay(day);
+    }
 
 }
