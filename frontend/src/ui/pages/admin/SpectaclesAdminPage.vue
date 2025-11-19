@@ -354,6 +354,11 @@ function ensureSeconds(value: string): string {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+
+  & .btn {
+    height: unset;
+    width: 14em;
+  }
 }
 
 .admin__content {

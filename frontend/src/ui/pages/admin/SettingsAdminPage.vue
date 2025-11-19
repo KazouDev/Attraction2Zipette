@@ -220,7 +220,8 @@ const handleDeletePersonnage = async (id: number) => {
 }
 
 .panel {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
   padding: 1.5rem;
   border-radius: 1.2rem;
@@ -229,13 +230,18 @@ const handleDeletePersonnage = async (id: number) => {
 }
 
 .panel__header {
-  display: grid;
   gap: 1rem;
 }
 
 .panel__form {
   display: flex;
   gap: 0.75rem;
+  align-items: center;
+
+  .btn {
+    border-radius: 13px;
+    padding: .9em 1em;
+  }
 }
 
 .panel__input {
