@@ -104,7 +104,7 @@ const linkClass = (name: string) =>
 }
 
 .layout__cta {
-  background: linear-gradient(135deg, #f97316, #ef4444);
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
   color: #fff;
   font-weight: 600;
 }
