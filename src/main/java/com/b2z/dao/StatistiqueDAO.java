@@ -40,13 +40,14 @@ public class StatistiqueDAO {
 
     public List<SpectacleWithDuration> getSpectaclesRankingByDurationForDay(int jourSemaine) {
         final String QUERY = """
-            SELECT s.id AS spectacle_id, 
+            SELECT s.id AS spectacle_id,
                    s.titre AS spectacle_titre,
                    pr.jour_semaine,
-                   TIMESTAMPDIFF(MINUTE, pr.heure_debut, pr.heure_fin) AS duration_minutes
+                   SUM(TIMESTAMPDIFF(MINUTE, pr.heure_debut, pr.heure_fin)) AS duration_minutes
             FROM Spectacle s
             JOIN Programmation pr ON s.id = pr.spectacle_id
             WHERE pr.jour_semaine = ?
+            GROUP BY s.id, s.titre, pr.jour_semaine
             ORDER BY duration_minutes DESC, s.titre ASC
             """;
 
@@ -66,12 +67,13 @@ public class StatistiqueDAO {
 
     public List<SpectacleWithDuration> getSpectaclesRankingByDurationAllDays() {
         final String QUERY = """
-            SELECT s.id AS spectacle_id, 
+            SELECT s.id AS spectacle_id,
                    s.titre AS spectacle_titre,
                    pr.jour_semaine,
-                   TIMESTAMPDIFF(MINUTE, pr.heure_debut, pr.heure_fin) AS duration_minutes
+                   SUM(TIMESTAMPDIFF(MINUTE, pr.heure_debut, pr.heure_fin)) AS duration_minutes
             FROM Spectacle s
             JOIN Programmation pr ON s.id = pr.spectacle_id
+            GROUP BY s.id, s.titre, pr.jour_semaine
             ORDER BY pr.jour_semaine ASC, duration_minutes DESC, s.titre ASC
             """;
 
