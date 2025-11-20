@@ -18,12 +18,10 @@ public class StatistiqueDAO {
         final String QUERY = """
             SELECT p.id AS personnage_id, p.nom AS personnage_nom, SUM(a.activity_duration) AS total_activity
             FROM (
-                -- Durées des rencontres
                 SELECT rp.personnage_id AS personnage_id,
                        TIMESTAMPDIFF(MINUTE, rp.heure_debut, rp.heure_fin) AS activity_duration
                 FROM RencontrePersonnage rp
                 UNION ALL
-                -- Durées des programmations de spectacles (via la table de liaison)
                 SELECT sp.personnage_id AS personnage_id,
                        TIMESTAMPDIFF(MINUTE, pr.heure_debut, pr.heure_fin) AS activity_duration
                 FROM Programmation pr

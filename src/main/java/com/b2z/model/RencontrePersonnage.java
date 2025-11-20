@@ -1,12 +1,14 @@
 package com.b2z.model;
 
+import com.b2z.utils.JourSemaine;
+
 import java.sql.Time;
 
 public class RencontrePersonnage {
     private int id;
     private Personnage personnage;
     private Lieu lieu;
-    private String jourSemaine;
+    private JourSemaine jourSemaine;
     private Time heureDebut;
     private Time heureFin;
 
@@ -23,7 +25,7 @@ public class RencontrePersonnage {
     public RencontrePersonnage() {
     }
 
-    public RencontrePersonnage(int id, Personnage personnage, Lieu lieu, String jourSemaine, Time heureDebut, Time heureFin) {
+    public RencontrePersonnage(int id, Personnage personnage, Lieu lieu, JourSemaine jourSemaine, Time heureDebut, Time heureFin) {
         this.id = id;
         this.personnage = personnage;
         this.lieu = lieu;
@@ -37,7 +39,11 @@ public class RencontrePersonnage {
             int id = rs.getInt("rencontre_personnage_id");
             Lieu lieu = Lieu.fromResultSet(rs);
             Personnage personnage = Personnage.fromResultSet(rs);
-            String jourSemaine = rs.getString("rencontre_personnage_jour_semaine");
+            int jour = rs.getInt("rencontre_personnage_jour_semaine");
+            if (jour < 0 || jour > 6) {
+                return null;
+            }
+            JourSemaine jourSemaine = JourSemaine.fromInt(jour);
             Time heureDebut = rs.getTime("rencontre_personnage_heure_debut");
             Time heureFin = rs.getTime("rencontre_personnage_heure_fin");
             return new RencontrePersonnage(id, personnage, lieu, jourSemaine,  heureDebut, heureFin);
@@ -75,11 +81,11 @@ public class RencontrePersonnage {
         this.lieu = lieu;
     }
 
-    public String getJourSemaine() {
+    public JourSemaine getJourSemaine() {
         return jourSemaine;
     }
 
-    public void setJourSemaine(String jourSemaine) {
+    public void setJourSemaine(JourSemaine jourSemaine) {
         this.jourSemaine = jourSemaine;
     }
 

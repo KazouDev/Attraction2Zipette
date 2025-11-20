@@ -5,6 +5,7 @@ import com.b2z.model.Personnage;
 import com.b2z.model.RencontrePersonnage;
 import com.b2z.utils.ConflictChecker;
 import com.b2z.utils.DBRequest;
+import com.b2z.utils.JourSemaine;
 import com.b2z.utils.Utils;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -24,28 +25,70 @@ public class RencontreDAO implements DAOInterface {
             @NotNull Time heureFermeture
     ) {}
 
+    // java
     @Override
     public List<RencontrePersonnage> findAll() {
         final String QUERY_STRING = """
-            SELECT %s
-            FROM RencontrePersonnage %s
-            INNER JOIN Personnage %s ON %s.personnage_id = %s.id
-            INNER JOIN Lieu %s ON %s.lieu_id = %s.id
-            ORDER BY %s.jour_semaine ASC, %s.heure_debut ASC
-        """.formatted(
-            RencontrePersonnage.getSelectColumns(),
-            RencontrePersonnage.ALIAS_NAME,
+        SELECT %s
+        FROM RencontrePersonnage %s
+        INNER JOIN Personnage %s ON %s.personnage_id = %s.id
+        INNER JOIN Lieu %s ON %s.lieu_id = %s.id
+    """.formatted(
+                RencontrePersonnage.getSelectColumns(),
+                RencontrePersonnage.ALIAS_NAME,
                 Personnage.ALIAS_NAME,
-            RencontrePersonnage.ALIAS_NAME,
-            Personnage.ALIAS_NAME,
+                RencontrePersonnage.ALIAS_NAME,
+                Personnage.ALIAS_NAME,
                 Lieu.ALIAS_NAME,
-            RencontrePersonnage.ALIAS_NAME,
-            Lieu.ALIAS_NAME,
-            RencontrePersonnage.ALIAS_NAME,
-            RencontrePersonnage.ALIAS_NAME
+                RencontrePersonnage.ALIAS_NAME,
+                Lieu.ALIAS_NAME
         );
-        return DBRequest.executeSelect(QUERY_STRING, null, RencontrePersonnage::fromResultSet);
+
+        List<RencontrePersonnage> result = DBRequest.executeSelect(QUERY_STRING, null, RencontrePersonnage::fromResultSet);
+        if (result == null || result.isEmpty()) {
+            return List.of();
+        }
+
+        result.sort(java.util.Comparator.comparingLong(RencontreDAO::millisUntilNextOccurrence));
+        return result;
     }
+
+    // java
+    private static long millisUntilNextOccurrence(RencontrePersonnage r) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalTime nowTime = java.time.LocalTime.now();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+
+        int todayIdx = java.time.DayOfWeek.from(today).getValue() % 7 - 1;
+        int eventDay = r.getJourSemaine().getValeur();
+
+        java.sql.Time startSql = r.getHeureDebut();
+        java.sql.Time endSql = r.getHeureFin();
+        java.time.LocalTime startTime = startSql.toLocalTime();
+        java.time.LocalTime endTime = endSql.toLocalTime();
+
+        int daysUntil = (eventDay - todayIdx + 7) % 7;
+
+        boolean inProgress = false;
+        if (daysUntil == 0) {
+            if (!startTime.isAfter(nowTime) && endTime.isAfter(nowTime)) {
+                inProgress = true;
+            }
+            if (!endTime.isAfter(nowTime)) {
+                daysUntil = 7;
+            }
+        }
+
+        java.time.LocalDate nextDate = today.plusDays(daysUntil);
+        java.time.LocalDateTime nextStart = nextDate.atTime(startTime);
+
+        long millis = java.time.Duration.between(now, nextStart).toMillis();
+        return millis < 0 ? 0L : millis;
+    }
+
+
+
 
     @Override
     public RencontrePersonnage findById(int id) {
