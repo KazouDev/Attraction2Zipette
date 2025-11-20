@@ -22,7 +22,7 @@
         <header class="card__header">
           <div>
             <h2>{{ spectacle.titre }}</h2>
-            <p class="card__subtitle">{{ spectacle.lieu.nom }}</p>
+            <p class="card__subtitle"><mdicon name="map-marker" /> {{ spectacle.lieu.nom }}</p>
           </div>
         </header>
 

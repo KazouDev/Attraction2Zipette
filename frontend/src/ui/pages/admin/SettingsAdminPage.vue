@@ -28,11 +28,11 @@
           <li v-for="type in typeStore.items" :key="type.id" class="panel__item">
             <span>{{ type.nom }}</span>
             <div class="panel__item-actions">
-              <button class="btn btn--ghost" type="button" @click="handleRenameType(type.id, type.nom)">
-                Renommer
+              <button class="btn btn--ghost edit" type="button" @click="handleRenameType(type.id, type.nom)">
+                <mdicon name="pencil" />
               </button>
               <button class="btn btn--danger" type="button" @click="handleDeleteType(type.id)">
-                Supprimer
+                <mdicon name="trash-can-outline" />
               </button>
             </div>
           </li>
@@ -54,11 +54,11 @@
           <li v-for="lieu in lieuStore.items" :key="lieu.id" class="panel__item">
             <span>{{ lieu.nom }}</span>
             <div class="panel__item-actions">
-              <button class="btn btn--ghost" type="button" @click="handleRenameLieu(lieu.id, lieu.nom)">
-                Renommer
+              <button class="btn btn--ghost edit" type="button" @click="handleRenameLieu(lieu.id, lieu.nom)">
+                <mdicon name="pencil" />
               </button>
               <button class="btn btn--danger" type="button" @click="handleDeleteLieu(lieu.id)">
-                Supprimer
+                <mdicon name="trash-can-outline" />
               </button>
             </div>
           </li>
@@ -81,7 +81,7 @@
             <span>{{ personnage.nom }}</span>
             <div class="panel__item-actions">
               <button class="btn btn--danger" type="button" @click="handleDeletePersonnage(personnage.id)">
-                Supprimer
+                <mdicon name="trash-can-outline" />
               </button>
             </div>
           </li>
@@ -233,6 +233,10 @@ const handleDeletePersonnage = async (id: number) => {
   gap: 1rem;
 }
 
+.btn:disabled {
+  opacity: .3;
+}
+
 .panel__form {
   display: flex;
   gap: 0.75rem;
@@ -272,6 +276,15 @@ const handleDeletePersonnage = async (id: number) => {
 .panel__item-actions {
   display: flex;
   gap: 0.5rem;
+
+  .btn {
+    padding: .5em .6em;
+    border-radius: 15px;
+
+    &.edit {
+      padding: .5em .5em;
+    }
+  }
 }
 
 .btn {
@@ -299,7 +312,7 @@ const handleDeletePersonnage = async (id: number) => {
 }
 
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 50%;
   cursor: not-allowed;
 }
 </style>

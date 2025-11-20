@@ -14,11 +14,11 @@
         <RouterLink class="layout__link" :class="linkClass('public-spectacles')" :to="{ name: 'public-spectacles' }">
           Spectacles
         </RouterLink>
-        <RouterLink class="layout__link" :class="linkClass('public-stats')" :to="{ name: 'public-stats' }">
-          Statistiques
-        </RouterLink>
         <RouterLink class="layout__link" :class="linkClass('public-rencontres')" :to="{ name: 'public-rencontres' }">
           Rencontres
+        </RouterLink>
+        <RouterLink class="layout__link" :class="linkClass('public-stats')" :to="{ name: 'public-stats' }">
+          Statistiques
         </RouterLink>
         <RouterLink class="layout__cta" :to="{ name: 'admin-attractions' }">
           Espace administration

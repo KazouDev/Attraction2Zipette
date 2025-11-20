@@ -39,5 +39,5 @@ export const formatDuration = (minutes: number): string => {
 };
 
 export const summarizeTimeRange = (start: string, end: string): string => {
-  return `${formatTime(start)} – ${formatTime(end)}`;
+  return `${formatTime(start)} → ${formatTime(end)}`;
 };

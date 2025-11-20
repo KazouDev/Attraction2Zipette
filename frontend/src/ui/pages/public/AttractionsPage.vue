@@ -15,12 +15,22 @@
       </div>
     </header>
 
-    <!-- ErrorMessage supprimé, erreurs affichées via toasts -->
-
     <LoaderOverlay :visible="attractionStore.loading" />
 
     <section v-if="filteredAttractions.length > 0" class="grid">
       <article v-for="attraction in filteredAttractions" :key="attraction.id" class="card">
+        <div class="crowds">
+          <dd>
+              <span class="card__wait" :class="waitClass(attraction.tempsAttente ?? 0)" v-if="isOpen(attraction)">
+                {{ attraction.tempsAttente ?? 0 }} min d'attente
+              </span>
+            <span class="card__wait card__wait--high" v-else>
+                Fermé
+              </span>
+
+          </dd>
+        </div>
+
         <header class="card__header">
           <h2>{{ attraction.nom }}</h2>
           <span class="card__badge">{{ attraction.type.nom }}</span>
@@ -32,20 +42,8 @@
             <dd>{{ attraction.tailleMin }} cm</dd>
           </div>
           <div>
-            <dt>Avec accompagnateur</dt>
+            <dt>À partir de</dt>
             <dd>{{ attraction.tailleMinAdulte }} cm</dd>
-          </div>
-          <div>
-            <dt>Attente estimée</dt>
-            <dd>
-              <span class="card__wait" :class="waitClass(attraction.tempsAttente ?? 0)" v-if="isOpen(attraction)">
-                {{ attraction.tempsAttente ?? 0 }} min
-              </span>
-              <span class="card__wait card__wait--high" v-else>
-                Fermé
-              </span>
-
-            </dd>
           </div>
         </dl>
 
@@ -131,7 +129,9 @@ const isOpen = (attraction: Attraction) => {
   display: grid;
   gap: 1.75rem;
 }
-
+.card {
+  position: relative;
+}
 .page__header {
   display: flex;
   flex-wrap: wrap;
@@ -163,8 +163,10 @@ const isOpen = (attraction: Attraction) => {
 }
 
 .card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1.1rem;
+
   padding: 1.4rem;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 1.2rem;
@@ -176,7 +178,7 @@ const isOpen = (attraction: Attraction) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .card__header h2 {
@@ -197,6 +199,11 @@ const isOpen = (attraction: Attraction) => {
   gap: 0.8rem;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   margin: 0;
+  justify-items: center;
+
+  div {
+    width: fit-content;
+  }
 }
 
 .card__stats dt {
@@ -213,23 +220,21 @@ const isOpen = (attraction: Attraction) => {
 
 .card__wait {
   padding: 0.25rem 0.65rem;
-  border-radius: 0.75rem;
+  border-radius: 100px;
   font-size: 0.95rem;
   font-weight: 600;
-}
 
-.card__wait--low {
-  background: rgba(34, 197, 94, 0.15);
-  color: #15803d;
-}
+  display: block;
+  text-align: center;
 
-.card__wait--medium {
-  background: rgba(250, 204, 21, 0.2);
-  color: #b45309;
+  position: absolute;
+  top: -.5em;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .card__wait--high {
-  background: rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.3);
   color: #b91c1c;
 }
 

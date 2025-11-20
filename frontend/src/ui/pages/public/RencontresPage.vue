@@ -17,11 +17,11 @@
           </div>
           <div class="rencontre-card__body">
             <div class="rencontre-card__info">
-              <span class="rencontre-card__label">📍 Lieu</span>
+              <span class="rencontre-card__label"><mdicon name="map-marker" /> Lieu</span>
               <span class="rencontre-card__value">{{ rencontre.lieu.nom }}</span>
             </div>
             <div class="rencontre-card__info">
-              <span class="rencontre-card__label">🕐 Horaires</span>
+              <span class="rencontre-card__label"><mdicon name="clock-outline" /> Horaires</span>
               <span class="rencontre-card__value">
                 {{ formatTime(rencontre.heureDebut) }} → {{ formatTime(rencontre.heureFin) }}
               </span>
@@ -116,11 +116,6 @@ const formatTime = (time: string): string => {
   border-radius: 0.75rem;
   padding: 1rem;
   transition: all 0.2s;
-}
-
-.rencontre-card:hover {
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .rencontre-card__header {
