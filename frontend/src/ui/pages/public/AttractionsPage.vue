@@ -237,6 +237,14 @@ const isOpen = (attraction: Attraction) => {
   background: rgba(248, 113, 113, 0.3);
   color: #b91c1c;
 }
+.card__wait--low {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+.card__wait--medium {
+  background: rgba(250, 204, 21, 0.2);
+  color: #b45309;
+}
 
 .card__schedule h3 {
   margin: 0 0 0.75rem;
