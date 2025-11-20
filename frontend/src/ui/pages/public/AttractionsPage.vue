@@ -42,7 +42,7 @@
             <dd>{{ attraction.tailleMin }} cm</dd>
           </div>
           <div>
-            <dt>À partir de</dt>
+            <dt>Taille minimale accompagné</dt>
             <dd>{{ attraction.tailleMinAdulte }} cm</dd>
           </div>
         </dl>
