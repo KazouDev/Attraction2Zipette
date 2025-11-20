@@ -8,12 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@mdi/js':
+        specifier: ^7.4.47
+        version: 7.4.47
       axios:
         specifier: ^1.6.8
         version: 1.12.2
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
+      mdi-vue:
+        specifier: ^3.0.13
+        version: 3.0.13(@mdi/js@7.4.47)(vue@3.5.22(typescript@5.9.3))
       pinia:
         specifier: ^2.1.7
         version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
@@ -199,6 +205,9 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
+
+  '@mdi/js@7.4.47':
+    resolution: {integrity: sha512-KPnNOtm5i2pMabqZxpUz7iQf+mfrYZyKCZ8QNz85czgEt7cuHcGorWfdzUMWYA0SD+a6Hn4FmJ+YhzzzjkTZrQ==}
 
   '@rollup/rollup-android-arm-eabi@4.52.4':
     resolution: {integrity: sha512-BTm2qKNnWIQ5auf4deoetINJm2JzvihvGb9R6K/ETwKLql/Bb3Eg2H1FBp1gUb4YGbydMA3jcmQTR73q7J+GAA==}
@@ -499,6 +508,12 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
+  mdi-vue@3.0.13:
+    resolution: {integrity: sha512-QHfRJZfhTA4FLqxBh4Gzxq+U+V/XQLw9l8lSIwJGMY4L+7oP+5HkAd+rsySIGfcHLEZakN3xcYpcroLZAoh0cw==}
+    peerDependencies:
+      '@mdi/js': '*'
+      vue: '*'
+
   mime-db@1.52.0:
     resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
     engines: {node: '>= 0.6'}
@@ -707,6 +722,8 @@ snapshots:
     optional: true
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
+
+  '@mdi/js@7.4.47': {}
 
   '@rollup/rollup-android-arm-eabi@4.52.4':
     optional: true
@@ -1009,6 +1026,11 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   math-intrinsics@1.1.0: {}
+
+  mdi-vue@3.0.13(@mdi/js@7.4.47)(vue@3.5.22(typescript@5.9.3)):
+    dependencies:
+      '@mdi/js': 7.4.47
+      vue: 3.5.22(typescript@5.9.3)
 
   mime-db@1.52.0: {}
 

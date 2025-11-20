@@ -157,20 +157,19 @@ public class RencontreDAO implements DAOInterface {
             throw new IllegalArgumentException("Lieu introuvable");
         }
 
-        // Vérifier la cohérence des horaires
         if (!props.heureFermeture().after(props.heureOuverture())) {
             throw new IllegalArgumentException(
                     "L'heure de fin doit être après l'heure de début"
             );
         }
 
-        // Vérifier tous les conflits (spectacles + rencontres) via ConflictChecker
         ConflictChecker.checkAllConflicts(
                 props.personnageId(),
                 props.jourSemaine(),
                 props.heureOuverture(),
                 props.heureFermeture(),
                 props.lieuId(),
+                null,
                 null
         );
 

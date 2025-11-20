@@ -41,7 +41,25 @@ public class ConflictChecker {
             Time heureFin,
             int lieuId
     ) {
-        final String QUERY_SPECTACLES = """
+        checkConflictsWithSpectacles(
+                personnageId,
+                jourSemaine,
+                heureDebut,
+                heureFin,
+                lieuId,
+                null
+        );
+    }
+
+    public static void checkConflictsWithSpectacles(
+            int personnageId,
+            int jourSemaine,
+            Time heureDebut,
+            Time heureFin,
+            int lieuId,
+            Integer excludeSpectacleId
+    ) {
+        String QUERY_SPECTACLES = """
             SELECT p.jour_semaine, p.heure_debut, p.heure_fin, s.titre, l.id as lieu_id
             FROM Programmation p
             INNER JOIN Spectacle s ON p.spectacle_id = s.id
@@ -50,9 +68,18 @@ public class ConflictChecker {
             WHERE sp.personnage_id = ? AND p.jour_semaine = ?
         """;
 
+        Map<Integer, Object> params = new java.util.HashMap<>();
+        params.put(1, personnageId);
+        params.put(2, jourSemaine);
+
+        if (excludeSpectacleId != null) {
+            QUERY_SPECTACLES += " AND s.id != ?";
+            params.put(3, excludeSpectacleId);
+        }
+
         List<Map<String, Object>> spectacles = DBRequest.executeSelect(
                 QUERY_SPECTACLES,
-                Utils.map(1, personnageId, 2, jourSemaine),
+                params,
                 rs -> {
                     try {
                         return Map.of(
@@ -172,27 +199,11 @@ public class ConflictChecker {
             Time heureDebut,
             Time heureFin,
             int lieuId,
+            Integer excludeSpectacleId,
             Integer excludeRencontreId
     ) {
-        checkConflictsWithSpectacles(personnageId, jourSemaine, heureDebut, heureFin, lieuId);
+        checkConflictsWithSpectacles(personnageId, jourSemaine, heureDebut, heureFin, lieuId, excludeSpectacleId);
         checkConflictsWithRencontres(personnageId, jourSemaine, heureDebut, heureFin, lieuId, excludeRencontreId);
-    }
-
-    public static void checkConflictsForPersonnageInSpectacle(
-            List<Programmation> spectacleProgrammations,
-            int spectacleLieuId,
-            int personnageId
-    ) {
-        for (Programmation prog : spectacleProgrammations) {
-            checkAllConflicts(
-                    personnageId,
-                    prog.getJourSemaine().getValeur(),
-                    prog.getHeureOuverture(),
-                    prog.getHeureFermeture(),
-                    spectacleLieuId,
-                    null
-            );
-        }
     }
 
     public static boolean respecteBattement(@NotNull Time time, @NotNull Time time1, @NotNull Time heureOuverture, @NotNull Time heureFermeture) {
@@ -200,4 +211,3 @@ public class ConflictChecker {
         return minutesBetween >= MINUTES_BETWEEN_DIFFERENT_LOCATIONS;
     }
 }
-

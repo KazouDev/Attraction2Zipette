@@ -418,6 +418,7 @@ public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.Specta
                         prog.heureOuverture(),
                         prog.heureFermeture(),
                         lieuId,
+                        spectacleId,
                         null
                 );
             }
@@ -528,7 +529,6 @@ public class SpectacleDAO implements DAOInterface<Spectacle, SpectacleDAO.Specta
                 ProgrammationWithSpectacle::fromResultSet
         );
 
-        // Vérifier les conflits avec les spectacles
         for (Programmation prog : spectacleProgrammations) {
             for (ProgrammationWithSpectacle existing : existingSpectacles) {
                 Programmation existingProg = existing.programmation();
